@@ -84,6 +84,7 @@ jobs:
           application_name: Eb-scalable-x23289678
           environment_name: Eb-scalable-x23289678-env
           region: us-east-1
-          version_label: "flask-build-${{ github.run_number }}"
+          version_label: "flask-build-${{ github.run_number }}-${{ github.sha }}"
           deployment_package: deploy.zip
+          use_existing_version_if_available: true
           wait_for_deployment: false
