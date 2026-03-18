@@ -7,8 +7,10 @@ import requests
 import os
 import pymysql
 
-app = Flask(__name__)
-# app.secret_key = os.environ.get('APP_SECRET_KEY')
+application = Flask(__name__)
+
+app = application
+
 app.secret_key = '12345'
 
 db_config = {
