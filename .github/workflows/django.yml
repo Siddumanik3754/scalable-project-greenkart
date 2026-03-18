@@ -59,8 +59,8 @@ jobs:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_session_token: ${{ secrets.AWS_SESSION_TOKEN }}
-          application_name: Eb-devops-x25105990
-          environment_name: Eb-devops-x25105990-env
+          application_name: Eb-scalable-x23289678
+          environment_name: Eb-scalable-x23289678-env
           region: us-east-1
           version_label: "flask-build-${{ github.run_number }}"
           deployment_package: deploy.zip
