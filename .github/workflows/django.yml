@@ -35,6 +35,28 @@ jobs:
           sudo dpkg -i amazon-corretto-17-x64-linux-jdk.deb
           java -version
 
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy_package
+          # Copy application files (adjust paths based on your Flask app structure)
+          cp -r app deploy_package/ 2>/dev/null || :
+          cp -r application deploy_package/ 2>/dev/null || :
+          cp -r templates deploy_package/ 2>/dev/null || :
+          cp -r static deploy_package/ 2>/dev/null || :
+          cp *.py deploy_package/ 2>/dev/null || :
+          cp requirements.txt deploy_package/
+          cp Procfile deploy_package/ 2>/dev/null || :
+          cp .env.example deploy_package/ 2>/dev/null || :
+          # Create the zip file
+          cd deploy_package && zip -r ../deploy.zip . && cd ..
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-package
+          path: deploy.zip
+          retention-days: 7
+
   deploy:
     runs-on: ubuntu-latest
     needs: prebuild
