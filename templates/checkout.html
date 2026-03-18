@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/checkout.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/header.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/footer.css') }}">
+  <title>GreenKart — Checkout</title>
+  <style>
+    :root {
+      --cream: #F7F3ED; --warm-white: #FDFAF6; --charcoal: #1C1C1E; --dark: #2D2D2D;
+      --forest: #2C5F2E; --forest-light: #3D7A40; --forest-pale: #EAF2EA;
+      --terracotta: #C4622D; --stone: #9B9189; --border: #DDD7CE; --amber: #D4962A;
+      --shadow-sm: 0 2px 8px rgba(28,28,30,0.08); --shadow-md: 0 4px 20px rgba(28,28,30,0.12);
+      --font-display: 'Playfair Display', Georgia, serif; --font-body: 'DM Sans', sans-serif;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--warm-white); color: var(--charcoal); }
+    .header { position: sticky; top: 0; z-index: 100; background: rgba(253,250,246,0.96); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 2rem; box-shadow: 0 2px 8px rgba(28,28,30,0.06); }
+    .header .container { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 2rem; height: 70px; }
+    .logo a { font-family: var(--font-display) !important; font-size: 1.5rem !important; font-weight: 700 !important; color: var(--forest) !important; text-decoration: none !important; background: none !important; padding: 0 !important; border-radius: 0 !important; }
+    .header nav { flex: 1; }
+    .header nav ul { display: flex; list-style: none; gap: 0.25rem; align-items: center; }
+    .header nav ul li a { font-size: 0.9rem; font-weight: 500; color: var(--dark); text-decoration: none; padding: 0.5rem 1rem; border-radius: 6px; transition: var(--transition); }
+    .header nav ul li a:hover { background: var(--forest-pale); color: var(--forest); }
+    .header nav form { display: flex; align-items: center; gap: 0.5rem; }
+    .header nav form input[type="search"] { padding: 0.5rem 1.1rem; border: 1.5px solid var(--border); border-radius: 50px; font-family: var(--font-body); font-size: 0.85rem; background: var(--cream); color: var(--charcoal); outline: none; width: 230px; }
+    .header nav form button { background: var(--forest); border: none; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .header nav form button .material-icons { color: white; font-size: 18px; }
+    .header .user { display: flex; align-items: center; gap: 0.75rem; margin-left: auto; }
+    .header .user a { display: flex; align-items: center; gap: 0.3rem; color: var(--dark); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.45rem 0.9rem; border-radius: 6px; transition: var(--transition); }
+    .header .user a:hover { background: var(--forest-pale); color: var(--forest); }
+    .header .cart { position: relative; }
+    .header #cart-count { position: absolute; top: 0; right: 0; background: var(--terracotta); color: white; font-size: 0.65rem; font-weight: 700; min-width: 18px; height: 18px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+
+    .page-header { background: linear-gradient(135deg, #1a3a1b 0%, #2C5F2E 100%); padding: 2.5rem 2rem; color: white; }
+    .page-header .inner { max-width: 1280px; margin: 0 auto; }
+    .page-header h1 { font-family: var(--font-display); font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+    .page-header p { color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-top: 0.3rem; }
+
+    .checkout-layout { max-width: 1280px; margin: 2.5rem auto; padding: 0 2rem; display: grid; grid-template-columns: 1fr 380px; gap: 2rem; align-items: start; }
+
+    /* ORDER ITEMS */
+    .order-card { background: white; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
+    .card-header { background: var(--cream); border-bottom: 1px solid var(--border); padding: 1.2rem 1.5rem; }
+    .card-header h2 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { background: var(--cream); padding: 0.9rem 1.2rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 0.08em; }
+    tbody tr { border-top: 1px solid var(--border); }
+    tbody tr:hover { background: #fdfcfa; }
+    tbody td { padding: 1rem 1.2rem; font-size: 0.9rem; vertical-align: middle; }
+    .prod-name { font-weight: 600; }
+    .prod-desc { font-size: 0.78rem; color: var(--stone); }
+    .prod-price { font-family: var(--font-display); font-weight: 700; color: var(--forest); }
+    .cat-badge { display: inline-flex; padding: 0.25rem 0.6rem; border-radius: 50px; font-size: 0.72rem; font-weight: 600; background: var(--forest-pale); color: var(--forest); }
+
+    /* SHIPPING */
+    .ship-card { background: white; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-top: 1.5rem; }
+    .address-body { padding: 1.2rem 1.5rem; }
+    .address-body p { font-size: 0.88rem; color: var(--dark); line-height: 1.8; }
+
+    /* PAYMENT SUMMARY */
+    .payment-card { background: white; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; position: sticky; top: 90px; }
+    .payment-header { background: linear-gradient(135deg, var(--forest-pale), #d4e8d5); border-bottom: 1px solid var(--border); padding: 1.5rem; text-align: center; }
+    .payment-header .payment-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .payment-header h2 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--charcoal); }
+    .payment-body { padding: 1.5rem; }
+    .pay-row { display: flex; justify-content: space-between; margin-bottom: 0.9rem; font-size: 0.88rem; }
+    .pay-row span:first-child { color: var(--stone); }
+    .pay-divider { height: 1px; background: var(--border); margin: 1rem 0; }
+    .pay-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .pay-total span:first-child { font-weight: 600; font-size: 0.95rem; }
+    .total-amount { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; color: var(--forest); }
+    
+    /* PAYMENT METHODS */
+    .pay-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1.2rem; }
+    .pay-method { border: 1.5px solid var(--border); border-radius: 8px; padding: 0.6rem; text-align: center; cursor: pointer; font-size: 0.75rem; color: var(--stone); transition: var(--transition); }
+    .pay-method:hover, .pay-method.active { border-color: var(--forest); color: var(--forest); background: var(--forest-pale); }
+    .pay-method-icon { font-size: 1.1rem; display: block; margin-bottom: 0.2rem; }
+    
+    .btn-place-order { width: 100%; padding: 1rem; background: var(--forest); color: white; border: none; border-radius: 12px; font-family: var(--font-body); font-size: 1rem; font-weight: 700; cursor: pointer; transition: var(--transition); letter-spacing: 0.02em; }
+    .btn-place-order:hover { background: var(--forest-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(44,95,46,0.3); }
+    .btn-continue { width: 100%; padding: 0.8rem; background: transparent; color: var(--dark); border: 1.5px solid var(--border); border-radius: 10px; font-family: var(--font-body); font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: var(--transition); margin-top: 0.6rem; }
+    .btn-continue:hover { background: var(--cream); }
+    .secure-note { display: flex; align-items: center; justify-content: center; gap: 0.3rem; margin-top: 0.8rem; font-size: 0.72rem; color: var(--stone); }
+    .secure-note .material-icons { font-size: 12px; color: var(--forest); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="logo"><a href="{{ url_for('home') }}">GreenKart</a></div>
+      <nav class="show-menu">
+        <ul>
+          <li><a href="{{ url_for('home') }}">Home</a></li>
+          <li><a href="{{ url_for('products') }}">Shop</a></li>
+          <li>
+            <form action="/search" method="GET">
+              <input type="search" name="query" placeholder="Search products...">
+              <button type="submit"><i class="material-icons">search</i></button>
+            </form>
+          </li>
+        </ul>
+      </nav>
+      <div class="user">
+        <div class="profile"><a href="{{ url_for('profile') }}"><i class="material-icons">account_circle</i>Account</a></div>
+        <div class="cart">
+          <a href="{{ url_for('cart') }}">
+            <i class="material-icons">shopping_cart</i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <div class="inner"><h1>Payment Checkout</h1><p>Review your order before confirming</p></div>
+  </div>
+
+  <div class="checkout-layout">
+    <div>
+      <!-- ORDER ITEMS -->
+      <div class="order-card">
+        <div class="card-header"><h2>Order Items</h2></div>
+        <table>
+          <thead>
+            <tr><th>Product</th><th>Category</th><th>Price</th></tr>
+          </thead>
+          <tbody>
+            {% for product in cart_products %}
+            <tr>
+              <td>
+                <div class="prod-name">{{ product[1] }}</div>
+                <div class="prod-desc">{{ product[2][:50] }}{% if product[2]|length > 50 %}...{% endif %}</div>
+              </td>
+              <td><span class="cat-badge">{{ product[5] }}</span></td>
+              <td><span class="prod-price">€ {{ product[3] }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SHIPPING INFO -->
+      {% if shipping_info %}
+      <div class="ship-card" style="margin-top:1.5rem;">
+        <div class="card-header"><h2>Delivery Address</h2></div>
+        <div class="address-body">
+          {% for ship in shipping_info %}
+          <p><strong>{{ ship[2] }}</strong></p>
+          <p>{{ ship[3] }}, {{ ship[4] }}, {{ ship[5] }} — {{ ship[6] }}</p>
+          <p>{{ ship[7] }}</p>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- PAYMENT PANEL -->
+    <div class="payment-card">
+      <div class="payment-header">
+        <div class="payment-icon">💳</div>
+        <h2>Order Summary</h2>
+      </div>
+      <div class="payment-body">
+        <div class="pay-row"><span>Subtotal</span><span>€ {{ total_price }}</span></div>
+        <div class="pay-row"><span>Delivery</span><span style="color: var(--forest);">Free</span></div>
+        <div class="pay-row"><span>Discount</span><span>€ {{ discount_amount }}</span></div>
+        <div class="pay-divider"></div>
+        <div class="pay-total">
+          <span>Total Amount</span>
+          <span class="total-amount">€ {{ total_final_price }}</span>
+        </div>
+
+
+
+        <form action="{{ url_for('place_order') }}" method="POST">
+          <button type="submit" class="btn-place-order">Place Order →</button>
+        </form>
+        <form action="{{ url_for('products') }}">
+          <button type="submit" class="btn-continue">← Continue Shopping</button>
+        </form>
+        <div class="secure-note"><i class="material-icons">lock</i> 256-bit SSL Encrypted Payment</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

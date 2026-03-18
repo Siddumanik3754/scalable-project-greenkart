@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/videos.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/header.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/footer.css') }}">
+  <title>GreenKart — Cooking Videos</title>
+  <style>
+    :root {
+      --cream: #F7F3ED; --warm-white: #FDFAF6; --charcoal: #1C1C1E; --dark: #2D2D2D;
+      --forest: #2C5F2E; --forest-light: #3D7A40; --forest-pale: #EAF2EA;
+      --terracotta: #C4622D; --stone: #9B9189; --border: #DDD7CE;
+      --shadow-sm: 0 2px 8px rgba(28,28,30,0.08); --shadow-md: 0 4px 20px rgba(28,28,30,0.12);
+      --font-display: 'Playfair Display', Georgia, serif; --font-body: 'DM Sans', sans-serif;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--warm-white); color: var(--charcoal); }
+    .header { position: sticky; top: 0; z-index: 100; background: rgba(253,250,246,0.96); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 2rem; box-shadow: 0 2px 8px rgba(28,28,30,0.06); }
+    .header .container { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 2rem; height: 70px; }
+    .logo a { font-family: var(--font-display) !important; font-size: 1.5rem !important; font-weight: 700 !important; color: var(--forest) !important; text-decoration: none !important; background: none !important; padding: 0 !important; border-radius: 0 !important; }
+    .header nav { flex: 1; }
+    .header nav ul { display: flex; list-style: none; gap: 0.25rem; align-items: center; }
+    .header nav ul li a { font-size: 0.9rem; font-weight: 500; color: var(--dark); text-decoration: none; padding: 0.5rem 1rem; border-radius: 6px; transition: var(--transition); }
+    .header nav ul li a:hover { background: var(--forest-pale); color: var(--forest); }
+    .header nav form { display: flex; align-items: center; gap: 0.5rem; }
+    .header nav form input[type="search"] { padding: 0.5rem 1.1rem; border: 1.5px solid var(--border); border-radius: 50px; font-family: var(--font-body); font-size: 0.85rem; background: var(--cream); color: var(--charcoal); outline: none; width: 230px; }
+    .header nav form button { background: var(--forest); border: none; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .header nav form button .material-icons { color: white; font-size: 18px; }
+    .header .user { display: flex; align-items: center; gap: 0.75rem; margin-left: auto; }
+    .header .user a { display: flex; align-items: center; gap: 0.3rem; color: var(--dark); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.45rem 0.9rem; border-radius: 6px; transition: var(--transition); }
+    .header .user a:hover { background: var(--forest-pale); color: var(--forest); }
+    .header .cart { position: relative; }
+    .header #cart-count { position: absolute; top: 0; right: 0; background: var(--terracotta); color: white; font-size: 0.65rem; font-weight: 700; min-width: 18px; height: 18px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+
+    .page-hero { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); padding: 4rem 2rem; color: white; text-align: center; }
+    .page-hero .inner { max-width: 700px; margin: 0 auto; }
+    .page-hero .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .page-hero h1 { font-family: var(--font-display); font-size: 2.5rem; font-weight: 700; margin-bottom: 0.75rem; letter-spacing: -0.02em; }
+    .page-hero p { color: rgba(255,255,255,0.75); font-size: 1rem; line-height: 1.7; }
+
+    .videos-section { max-width: 1280px; margin: 3rem auto; padding: 0 2rem; }
+    .videos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 2rem; }
+    .video-card { background: white; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-sm); transition: var(--transition); }
+    .video-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .video-wrapper { position: relative; padding-bottom: 56.25%; overflow: hidden; }
+    .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+    .video-info { padding: 1.2rem 1.5rem; }
+    .video-info h2 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--charcoal); }
+    .video-badge { display: inline-flex; align-items: center; gap: 0.3rem; background: #fff0eb; color: var(--terracotta); font-size: 0.72rem; font-weight: 600; padding: 0.25rem 0.6rem; border-radius: 50px; margin-top: 0.4rem; }
+
+    .footer { background: var(--charcoal); color: rgba(255,255,255,0.7); padding: 3rem 2rem 1.5rem; }
+    .footer-inner { max-width: 1280px; margin: 0 auto; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; text-align: center; }
+    .footer-bottom p { font-size: 0.78rem; color: rgba(255,255,255,0.4); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="logo"><a href="{{ url_for('home') }}">GreenKart</a></div>
+      <nav class="show-menu">
+        <ul>
+          <li><a href="{{ url_for('home') }}">Home</a></li>
+          <li><a href="{{ url_for('products') }}">Shop</a></li>
+          <li><a href="{{ url_for('recipe') }}">Recipes</a></li>
+          <li><a href="{{ url_for('videos') }}">Videos</a></li>
+          <li>
+            <form action="/search" method="GET">
+              <input type="search" name="query" placeholder="Search products...">
+              <button type="submit"><i class="material-icons">search</i></button>
+            </form>
+          </li>
+        </ul>
+      </nav>
+      <div class="user">
+        <div class="profile"><a href="{{ url_for('profile') }}"><i class="material-icons">account_circle</i>Account</a></div>
+        <div class="cart">
+          <a href="{{ url_for('cart') }}">
+            <i class="material-icons">shopping_cart</i>
+            {% if cart_count > 0 %}<span id="cart-count">{{ cart_count }}</span>{% endif %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-hero">
+    <div class="inner">
+      <div class="icon">🎬</div>
+      <h1>Cooking Videos</h1>
+      <p>Watch expert chefs prepare mouth-watering dishes using ingredients available at GreenKart.</p>
+    </div>
+  </div>
+
+  <section class="videos-section">
+    <div class="videos-grid">
+      {% for video in videos %}
+      <div class="video-card">
+        <div class="video-wrapper">
+          <iframe src="https://www.youtube.com/embed/{{ video.id }}" allowfullscreen></iframe>
+        </div>
+        <div class="video-info">
+          <h2>{{ video.title }}</h2>
+          <span class="video-badge">▶ Watch Now</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+</body>
+</html>

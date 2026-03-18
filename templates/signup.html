@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/signup.css') }}">
+  <title>GreenKart — Create Account</title>
+  <style>
+    :root {
+      --cream: #F7F3ED; --warm-white: #FDFAF6; --charcoal: #1C1C1E;
+      --forest: #2C5F2E; --forest-light: #3D7A40; --forest-pale: #EAF2EA;
+      --terracotta: #C4622D; --stone: #9B9189; --border: #DDD7CE;
+      --shadow-lg: 0 12px 40px rgba(28,28,30,0.16);
+      --font-display: 'Playfair Display', Georgia, serif; --font-body: 'DM Sans', sans-serif;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body); min-height: 100vh;
+      background: linear-gradient(135deg, #1a3a1b 0%, #2C5F2E 50%, #3d7a40 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+    .brand-header { margin-bottom: 2rem; text-align: center; }
+    .brand-header h2 { font-family: var(--font-display); color: white; font-size: 1.5rem; font-weight: 700; }
+    .brand-header p { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 0.3rem; }
+    .auth-card {
+      background: white; border-radius: 24px; overflow: hidden;
+      width: 100%; max-width: 480px; box-shadow: var(--shadow-lg);
+    }
+    .auth-card-header {
+      background: var(--cream); border-bottom: 1px solid var(--border);
+      padding: 2.5rem 2.5rem 2rem;
+    }
+    .auth-icon { width: 52px; height: 52px; background: var(--forest-pale); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1.2rem; }
+    .auth-card-header h1 { font-family: var(--font-display); font-size: 1.7rem; font-weight: 700; color: var(--charcoal); margin-bottom: 0.4rem; letter-spacing: -0.02em; }
+    .auth-card-header p { color: var(--stone); font-size: 0.88rem; }
+    .auth-card-body { padding: 2rem 2.5rem 2.5rem; }
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--charcoal); margin-bottom: 0.4rem; }
+    .form-group input { width: 100%; padding: 0.8rem 1rem; border: 1.5px solid var(--border); border-radius: 8px; font-family: var(--font-body); font-size: 0.9rem; color: var(--charcoal); background: var(--warm-white); outline: none; transition: var(--transition); }
+    .form-group input:focus { border-color: var(--forest); background: white; box-shadow: 0 0 0 3px rgba(44,95,46,0.1); }
+    .form-group input::placeholder { color: #bbb; }
+    .btn-auth { width: 100%; padding: 0.9rem; background: var(--forest); color: white; border: none; border-radius: 10px; font-family: var(--font-body); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: var(--transition); }
+    .btn-auth:hover { background: var(--forest-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(44,95,46,0.3); }
+    .auth-footer { margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--stone); }
+    .auth-footer a { color: var(--forest); font-weight: 600; text-decoration: none; }
+    .auth-footer a:hover { text-decoration: underline; }
+    footer { margin-top: 2rem; }
+    footer p { color: rgba(255,255,255,0.4); font-size: 0.78rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="brand-header">
+    <h2>GreenKart</h2>
+    <p>Create your free account today</p>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-card-header">
+      <div class="auth-icon">🌿</div>
+      <h1>Create Account</h1>
+      <p>Join thousands of happy shoppers</p>
+    </div>
+    <div class="auth-card-body">
+      <form id="signin-form" action="/register" method="POST">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" placeholder="John Doe" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="text" id="phone" name="phone" placeholder="+91 00000 00000" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+        </div>
+        <button type="submit" class="btn-auth">Create My Account →</button>
+        <div class="auth-footer">
+          Already have an account? <a href="{{ url_for('signin') }}">Sign In</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer><p>© 2024 GreenKart. All Rights Reserved.</p></footer>
+</body>
+</html>

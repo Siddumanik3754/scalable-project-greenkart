@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/cart.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/header.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/footer.css') }}">
+  <title>GreenKart — Your Cart</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+    :root {
+      --cream: #F7F3ED; --warm-white: #FDFAF6; --charcoal: #1C1C1E; --dark: #2D2D2D;
+      --forest: #2C5F2E; --forest-light: #3D7A40; --forest-pale: #EAF2EA;
+      --terracotta: #C4622D; --stone: #9B9189; --border: #DDD7CE;
+      --shadow-sm: 0 2px 8px rgba(28,28,30,0.08); --shadow-md: 0 4px 20px rgba(28,28,30,0.12);
+      --font-display: 'Playfair Display', Georgia, serif; --font-body: 'DM Sans', sans-serif;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--warm-white); color: var(--charcoal); }
+    .header {
+      position: sticky; top: 0; z-index: 100; background: rgba(253,250,246,0.96);
+      backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
+      padding: 0 2rem; box-shadow: 0 2px 8px rgba(28,28,30,0.06);
+    }
+    .header .container { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 2rem; height: 70px; }
+    .logo a { font-family: var(--font-display) !important; font-size: 1.5rem !important; font-weight: 700 !important; color: var(--forest) !important; text-decoration: none !important; background: none !important; padding: 0 !important; border-radius: 0 !important; }
+    .header nav { flex: 1; }
+    .header nav ul { display: flex; list-style: none; gap: 0.25rem; align-items: center; }
+    .header nav ul li a { font-size: 0.9rem; font-weight: 500; color: var(--dark); text-decoration: none; padding: 0.5rem 1rem; border-radius: 6px; transition: var(--transition); }
+    .header nav ul li a:hover { background: var(--forest-pale); color: var(--forest); }
+    .header nav form { display: flex; align-items: center; gap: 0.5rem; }
+    .header nav form input[type="search"] { padding: 0.5rem 1.1rem; border: 1.5px solid var(--border); border-radius: 50px; font-family: var(--font-body); font-size: 0.85rem; background: var(--cream); color: var(--charcoal); outline: none; width: 230px; transition: var(--transition); }
+    .header nav form input[type="search"]:focus { border-color: var(--forest); background: white; }
+    .header nav form button { background: var(--forest); border: none; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .header nav form button .material-icons { color: white; font-size: 18px; }
+    .header .user { display: flex; align-items: center; gap: 0.75rem; margin-left: auto; }
+    .header .user a { display: flex; align-items: center; gap: 0.3rem; color: var(--dark); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.45rem 0.9rem; border-radius: 6px; transition: var(--transition); }
+    .header .user a:hover { background: var(--forest-pale); color: var(--forest); }
+    .header .cart { position: relative; }
+    .header #cart-count { position: absolute; top: 0; right: 0; background: var(--terracotta); color: white; font-size: 0.65rem; font-weight: 700; min-width: 18px; height: 18px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+
+    /* PAGE */
+    .page-header { background: linear-gradient(135deg, #1a3a1b 0%, #2C5F2E 100%); padding: 2.5rem 2rem; color: white; }
+    .page-header .inner { max-width: 1280px; margin: 0 auto; }
+    .page-header h1 { font-family: var(--font-display); font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+    .page-header p { color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-top: 0.3rem; }
+
+    .cart-layout { max-width: 1280px; margin: 2.5rem auto; padding: 0 2rem; display: grid; grid-template-columns: 1fr 360px; gap: 2rem; align-items: start; }
+
+    /* CART TABLE */
+    .cart-items-card { background: white; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .cart-items-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); background: var(--cream); display: flex; justify-content: space-between; align-items: center; }
+    .cart-items-header h2 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
+    .cart-items-header span { font-size: 0.82rem; color: var(--stone); }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--cream); }
+    thead th { padding: 0.9rem 1.2rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 0.08em; }
+    tbody tr { border-top: 1px solid var(--border); transition: var(--transition); }
+    tbody tr:hover { background: #fdfcfa; }
+    tbody td { padding: 1.1rem 1.2rem; font-size: 0.9rem; vertical-align: middle; }
+    .product-name { font-weight: 600; color: var(--charcoal); }
+    .product-desc { color: var(--stone); font-size: 0.82rem; }
+    .product-price { font-family: var(--font-display); font-weight: 700; color: var(--forest); font-size: 1rem; }
+    .badge { display: inline-flex; padding: 0.3rem 0.7rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; background: var(--forest-pale); color: var(--forest); }
+
+    .btn-remove { background: none; border: 1.5px solid var(--border); padding: 0.4rem 0.9rem; border-radius: 6px; font-family: var(--font-body); font-size: 0.8rem; color: var(--stone); cursor: pointer; transition: var(--transition); }
+    .btn-remove:hover { border-color: var(--terracotta); color: var(--terracotta); background: #fdf2ee; }
+
+    /* EMPTY STATE */
+    .empty-cart { text-align: center; padding: 4rem 2rem; }
+    .empty-cart-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+    .empty-cart h3 { font-family: var(--font-display); font-size: 1.3rem; color: var(--charcoal); margin-bottom: 0.5rem; }
+    .empty-cart p { color: var(--stone); font-size: 0.9rem; }
+
+    /* SUMMARY */
+    .cart-summary { background: white; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; position: sticky; top: 90px; }
+    .summary-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); background: var(--cream); }
+    .summary-header h2 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
+    .summary-body { padding: 1.5rem; }
+    .summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.9rem; font-size: 0.88rem; }
+    .summary-row span:first-child { color: var(--stone); }
+    .summary-row span:last-child { font-weight: 600; }
+    .summary-divider { height: 1px; background: var(--border); margin: 1rem 0; }
+    .summary-total { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .summary-total span:first-child { font-weight: 600; font-size: 0.95rem; }
+    .summary-total .total-amount { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--forest); }
+
+    /* COUPON */
+    .coupon-section { margin-bottom: 1.25rem; }
+    .coupon-label { font-size: 0.8rem; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.35rem; }
+    .coupon-label .material-icons { font-size: 15px; color: var(--terracotta); }
+    .coupon-row { display: flex; gap: 0.5rem; }
+    .coupon-input { flex: 1; padding: 0.6rem 0.9rem; border: 1.5px solid var(--border); border-radius: 8px; font-family: var(--font-body); font-size: 0.85rem; color: var(--charcoal); background: var(--cream); outline: none; transition: var(--transition); letter-spacing: 0.05em; text-transform: uppercase; }
+    .coupon-input::placeholder { text-transform: none; letter-spacing: 0; color: var(--stone); }
+    .coupon-input:focus { border-color: var(--forest); background: white; box-shadow: 0 0 0 3px rgba(44,95,46,0.08); }
+    .coupon-input.is-valid { border-color: var(--forest); background: var(--forest-pale); }
+    .coupon-input.is-invalid { border-color: var(--terracotta); background: #fdf2ee; }
+    .btn-apply { padding: 0.6rem 1rem; background: var(--forest); color: white; border: none; border-radius: 8px; font-family: var(--font-body); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: var(--transition); white-space: nowrap; }
+    .btn-apply:hover { background: var(--forest-light); box-shadow: 0 3px 10px rgba(44,95,46,0.25); }
+    .btn-apply:active { transform: scale(0.97); }
+    .coupon-feedback { font-size: 0.78rem; margin-top: 0.4rem; display: none; align-items: center; gap: 0.3rem; }
+    .coupon-feedback.success { display: flex; color: var(--forest); }
+    .coupon-feedback.error { display: flex; color: var(--terracotta); }
+    .coupon-feedback .material-icons { font-size: 14px; }
+    .summary-row.discount-row span:last-child { color: var(--forest); }
+
+    .btn-checkout { width: 100%; padding: 0.9rem; background: var(--forest); color: white; border: none; border-radius: 10px; font-family: var(--font-body); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: var(--transition); margin-bottom: 0.75rem; }
+    .btn-checkout:hover { background: var(--forest-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(44,95,46,0.3); }
+    .btn-continue { width: 100%; padding: 0.9rem; background: transparent; color: var(--dark); border: 1.5px solid var(--border); border-radius: 10px; font-family: var(--font-body); font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: var(--transition); }
+    .btn-continue:hover { background: var(--cream); }
+    .secure-badge { display: flex; align-items: center; justify-content: center; gap: 0.4rem; margin-top: 1rem; color: var(--stone); font-size: 0.75rem; }
+    .secure-badge .material-icons { font-size: 14px; color: var(--forest); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="logo"><a href="{{ url_for('home') }}">GreenKart</a></div>
+      <nav class="show-menu">
+        <ul>
+          <li><a href="{{ url_for('home') }}">Home</a></li>
+          <li><a href="{{ url_for('products') }}">Shop</a></li>
+          <li>
+            <form action="/search" method="GET">
+              <input type="search" name="query" placeholder="Search products...">
+              <button type="submit"><i class="material-icons">search</i></button>
+            </form>
+          </li>
+        </ul>
+      </nav>
+      <div class="user">
+        <div class="profile"><a href="{{ url_for('profile') }}"><i class="material-icons">account_circle</i>Account</a></div>
+        <div class="cart">
+          <a href="{{ url_for('cart') }}">
+            <i class="material-icons">shopping_cart</i>
+            {% if cart_count > 0 %}<span id="cart-count">{{ cart_count }}</span>{% endif %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <div class="inner">
+      <h1>Your Cart</h1>
+      <p>Review your items before checkout</p>
+    </div>
+  </div>
+
+  <div class="cart-layout">
+    <div class="cart-items-card">
+      <div class="cart-items-header">
+        <h2>Cart Items</h2>
+        <span>{{ cart_products|length }} item(s)</span>
+      </div>
+      {% if cart_products %}
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in cart_products %}
+          <tr>
+            <td>
+              <div class="product-name">{{ product[1] }}</div>
+              <div class="product-desc">{{ product[2][:60] }}{% if product[2]|length > 60 %}...{% endif %}</div>
+            </td>
+            <td><span class="badge">{{ product[5] }}</span></td>
+            <td><span class="product-price">€ {{ product[3] }}</span></td>
+            <td>
+              <form action="{{ url_for('remove_from_cart') }}" method="POST">
+                <input type="hidden" name="product_id" value="{{ product[0] }}">
+                <button type="submit" class="btn-remove">Remove</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-cart">
+        <div class="empty-cart-icon">🛒</div>
+        <h3>Your cart is empty</h3>
+        <p>Looks like you haven't added anything yet.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="cart-summary">
+      <div class="summary-header"><h2>Order Summary</h2></div>
+      <div class="summary-body">
+        <div class="summary-row"><span>Subtotal</span><span>€ {{ total_price }}</span></div>
+        <div class="summary-row"><span>Delivery</span><span style="color: #2C5F2E;">Free</span></div>
+        <div class="summary-row"><span>Taxes</span><span>Included</span></div>
+        <div class="summary-divider"></div>
+        <div class="summary-total">
+          <span>Total</span>
+          <span class="total-amount" id="total-amount">€ {{ total_price }}</span>
+        </div>
+
+        <!-- COUPON CODE -->
+        <div class="coupon-section">
+          <div class="coupon-label">
+            <i class="material-icons">local_offer</i> Coupon Code
+          </div>
+          <div class="coupon-row">
+            <input
+              type="text"
+              id="coupon-input"
+              class="coupon-input"
+              placeholder="Enter coupon code"
+              maxlength="20"
+              autocomplete="off"
+            >
+            <button type="button" class="btn-apply" id="btn-apply-coupon">Apply</button>
+          </div>
+          <div class="coupon-feedback" id="coupon-feedback">
+            <i class="material-icons" id="coupon-feedback-icon">check_circle</i>
+            <span id="coupon-feedback-text"></span>
+          </div>
+        </div>
+
+        <div class="summary-row discount-row" id="discount-row" style="display:none;">
+          <span>Discount</span>
+          <span id="discount-value">- € 0</span>
+        </div>
+
+        <form action="{{ url_for('shipping') }}" method="GET">
+          <button type="submit" class="btn-checkout">Proceed to Checkout →</button>
+        </form>
+        <form action="{{ url_for('products') }}">
+          <button type="submit" class="btn-continue">← Continue Shopping</button>
+        </form>
+        <div class="secure-badge"><i class="material-icons">lock</i> Secure SSL Checkout</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Demo coupon validation — replace with your backend call as needed
+    const VALID_COUPONS = { 'SAVE10': 10, 'FRESH20': 20, 'WELCOME15': 15 };
+
+    // document.getElementById('btn-apply-coupon').addEventListener('click', function () {
+    //   const input = document.getElementById('coupon-input');
+    //   const feedback = document.getElementById('coupon-feedback');
+    //   const feedbackText = document.getElementById('coupon-feedback-text');
+    //   const feedbackIcon = document.getElementById('coupon-feedback-icon');
+    //   const code = input.value.trim().toUpperCase();
+
+    //   feedback.className = 'coupon-feedback';
+    //   input.className = 'coupon-input';
+
+    //   if (!code) {
+    //     feedback.classList.add('error');
+    //     feedbackIcon.textContent = 'error_outline';
+    //     feedbackText.textContent = 'Please enter a coupon code.';
+    //     input.classList.add('is-invalid');
+    //     return;
+    //   }
+
+    //   if (VALID_COUPONS[code] !== undefined) {
+    //     const discount = VALID_COUPONS[code];
+    //     feedback.classList.add('success');
+    //     feedbackIcon.textContent = 'check_circle';
+    //     feedbackText.textContent = `"${code}" applied — ${discount}% off!`;
+    //     input.classList.add('is-valid');
+    //     input.readOnly = true;
+    //     document.getElementById('btn-apply-coupon').textContent = 'Applied';
+    //     document.getElementById('btn-apply-coupon').style.background = '#9B9189';
+    //     document.getElementById('btn-apply-coupon').style.cursor = 'default';
+    //   } else {
+    //     feedback.classList.add('error');
+    //     feedbackIcon.textContent = 'error_outline';
+    //     feedbackText.textContent = 'Invalid coupon code. Please try again.';
+    //     input.classList.add('is-invalid');
+    //   }
+    // });
+
+    document.getElementById('btn-apply-coupon').addEventListener('click', function () {
+
+    const couponInput = document.getElementById('coupon-input');
+    const couponCode = couponInput.value.trim();
+
+    const subtotal = parseFloat("{{ total_price }}");
+
+    const feedback = document.getElementById('coupon-feedback');
+    const feedbackText = document.getElementById('coupon-feedback-text');
+    const feedbackIcon = document.getElementById('coupon-feedback-icon');
+
+    if (!couponCode) {
+        feedback.className = 'coupon-feedback error';
+        feedbackText.textContent = "Please enter a coupon code";
+        feedbackIcon.textContent = "error_outline";
+        return;
+    }
+
+    fetch("/apply_coupon_cart", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            total_amount: subtotal,
+            coupon_code: couponCode
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        if (data.status === "success") {
+
+            const finalPrice = data.final_price;
+            const discountAmount = data.discount_amount;
+
+            document.getElementById("total-amount").innerText = "€ " + finalPrice;
+
+            document.getElementById("discount-row").style.display = "flex";
+            document.getElementById("discount-value").innerText = "- € " + discountAmount;
+
+            feedback.className = "coupon-feedback success";
+            feedbackIcon.textContent = "check_circle";
+            feedbackText.textContent = data.discount_percent + "% discount applied!";
+
+            couponInput.readOnly = true;
+
+        } else {
+
+            feedback.className = "coupon-feedback error";
+            feedbackIcon.textContent = "error_outline";
+            feedbackText.textContent = "Invalid coupon code";
+
+        }
+
+    })
+    .catch(error => {
+
+        feedback.className = "coupon-feedback error";
+        feedbackIcon.textContent = "error_outline";
+        feedbackText.textContent = "Coupon service unavailable";
+    });
+
+});
+
+    // Allow pressing Enter to apply coupon
+    document.getElementById('coupon-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') document.getElementById('btn-apply-coupon').click();
+    });
+  </script>
+</body>
+</html>

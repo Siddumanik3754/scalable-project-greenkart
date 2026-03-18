@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>GreenKart — Admin Panel</title>
+  <style>
+    :root {
+      --cream: #F7F3ED; --warm-white: #FDFAF6; --charcoal: #1C1C1E; --dark: #2D2D2D;
+      --forest: #2C5F2E; --forest-light: #3D7A40; --forest-pale: #EAF2EA;
+      --terracotta: #C4622D; --amber: #D4962A; --stone: #9B9189; --border: #DDD7CE;
+      --shadow-sm: 0 2px 8px rgba(28,28,30,0.08); --shadow-md: 0 4px 20px rgba(28,28,30,0.12);
+      --font-display: 'Playfair Display', Georgia, serif; --font-body: 'DM Sans', sans-serif;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: #0f1117; color: white; min-height: 100vh; display: flex; }
+
+    /* SIDEBAR */
+    .sidebar { width: 240px; background: #161b22; border-right: 1px solid #30363d; display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-brand { padding: 1.5rem; border-bottom: 1px solid #30363d; }
+    .sidebar-brand h2 { font-family: var(--font-display); font-size: 1.1rem; color: white; }
+    .sidebar-brand span { font-size: 0.72rem; color: #6e7681; background: #21262d; padding: 0.2rem 0.5rem; border-radius: 4px; }
+    .sidebar-nav { padding: 1rem 0; flex: 1; }
+    .sidebar-nav a {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1.2rem;
+      color: #8b949e; text-decoration: none; font-size: 0.85rem; font-weight: 500;
+      transition: var(--transition); border-left: 3px solid transparent;
+    }
+    .sidebar-nav a:hover, .sidebar-nav a.active { color: white; background: rgba(255,255,255,0.05); border-left-color: var(--forest); }
+    .sidebar-nav .material-icons { font-size: 18px; }
+    .sidebar-section { padding: 0.5rem 1.2rem; font-size: 0.68rem; font-weight: 700; color: #484f58; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem; }
+
+    /* MAIN */
+    .main { flex: 1; overflow-y: auto; }
+    .topbar { background: #161b22; border-bottom: 1px solid #30363d; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+    .topbar h1 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: white; }
+    .topbar-actions { display: flex; align-items: center; gap: 1rem; }
+    .topbar-btn { display: flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; background: var(--forest); color: white; border: none; border-radius: 6px; font-family: var(--font-body); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: var(--transition); text-decoration: none; }
+    .topbar-btn:hover { background: var(--forest-light); }
+    .admin-badge { background: #21262d; border: 1px solid #30363d; padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.78rem; color: #8b949e; }
+
+    .content { padding: 2rem; }
+
+    /* STATS GRID */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 1.5rem; transition: var(--transition); }
+    .stat-card:hover { border-color: #484f58; }
+    .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 1rem; }
+    .stat-icon.green { background: rgba(44,95,46,0.2); }
+    .stat-icon.orange { background: rgba(196,98,45,0.2); }
+    .stat-icon.blue { background: rgba(59,130,246,0.2); }
+    .stat-icon.amber { background: rgba(212,150,42,0.2); }
+    .stat-label { font-size: 0.75rem; color: #6e7681; font-weight: 500; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .stat-value { font-family: var(--font-display); font-size: 1.8rem; font-weight: 700; color: white; }
+    .stat-change { font-size: 0.75rem; color: #3fb950; margin-top: 0.3rem; }
+
+    /* PANELS */
+    .panels-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .panel { background: #161b22; border: 1px solid #30363d; border-radius: 12px; overflow: hidden; }
+    .panel-header { padding: 1rem 1.5rem; border-bottom: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
+    .panel-header h3 { font-size: 0.9rem; font-weight: 600; color: white; }
+    .panel-header a { font-size: 0.78rem; color: #58a6ff; text-decoration: none; }
+    .panel-body { padding: 1rem 1.5rem; }
+    .panel-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #21262d; }
+    .panel-item:last-child { border-bottom: none; }
+    .panel-item-name { font-size: 0.85rem; color: #c9d1d9; }
+    .panel-item-sub { font-size: 0.75rem; color: #6e7681; }
+    .panel-item-badge { font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 50px; }
+    .badge-green { background: rgba(63,185,80,0.15); color: #3fb950; }
+    .badge-amber { background: rgba(212,150,42,0.15); color: var(--amber); }
+    .badge-red { background: rgba(196,98,45,0.15); color: var(--terracotta); }
+
+    .quick-actions { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .quick-btn { flex: 1; min-width: 160px; padding: 1rem; background: #161b22; border: 1px solid #30363d; border-radius: 10px; color: white; text-align: center; text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: var(--transition); cursor: pointer; }
+    .quick-btn:hover { border-color: var(--forest); background: rgba(44,95,46,0.1); }
+    .quick-btn .icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
+  </style>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h2>GreenKart</h2>
+      <span>Admin Panel</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Overview</div>
+      <a href="#" class="active"><i class="material-icons">dashboard</i> Dashboard</a>
+      <div class="sidebar-section">Management</div>
+      <a href="#"><i class="material-icons">inventory_2</i> Products</a>
+      <a href="#"><i class="material-icons">shopping_bag</i> Orders</a>
+      <a href="#"><i class="material-icons">people</i> Customers</a>
+      <a href="#"><i class="material-icons">category</i> Categories</a>
+      <div class="sidebar-section">Reports</div>
+      <a href="#"><i class="material-icons">bar_chart</i> Analytics</a>
+      <a href="#"><i class="material-icons">receipt</i> Invoices</a>
+      <div class="sidebar-section">Settings</div>
+      <a href="#"><i class="material-icons">settings</i> Settings</a>
+      <a href="/"><i class="material-icons">storefront</i> View Store</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <div class="topbar">
+      <h1>Dashboard</h1>
+      <div class="topbar-actions">
+        <span class="admin-badge">Admin</span>
+        <a href="#" class="topbar-btn"><i class="material-icons" style="font-size:16px">add</i> Add Product</a>
+      </div>
+    </div>
+
+    <div class="content">
+      
+      <!-- QUICK ACTIONS -->
+      <div class="quick-actions">
+        <a class="quick-btn" href="#"><div class="icon">➕</div>Add Product</a>
+        <a class="quick-btn" href="#"><div class="icon">📊</div>View Reports</a>
+        <a class="quick-btn" href="#"><div class="icon">🚚</div>Manage Delivery</a>
+        <a class="quick-btn" href="#"><div class="icon">💬</div>Customer Support</a>
+        <a class="quick-btn" href="#"><div class="icon">🏷️</div>Add Discount</a>
+      </div>
+
+      <!-- PANELS -->
+      <div class="panels-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Recent Orders</h3>
+            <a href="#">View all →</a>
+          </div>
+          <div class="panel-body">
+            <div class="panel-item">
+              <div><div class="panel-item-name">Order #1084</div><div class="panel-item-sub">€ 1,240 · 3 items</div></div>
+              <span class="panel-item-badge badge-green">Delivered</span>
+            </div>
+            <div class="panel-item">
+              <div><div class="panel-item-name">Order #1083</div><div class="panel-item-sub">€ 890 · 5 items</div></div>
+              <span class="panel-item-badge badge-amber">In Transit</span>
+            </div>
+            <div class="panel-item">
+              <div><div class="panel-item-name">Order #1082</div><div class="panel-item-sub">€ 560 · 2 items</div></div>
+              <span class="panel-item-badge badge-green">Delivered</span>
+            </div>
+            <div class="panel-item">
+              <div><div class="panel-item-name">Order #1081</div><div class="panel-item-sub">€ 2,100 · 8 items</div></div>
+              <span class="panel-item-badge badge-red">Processing</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Low Stock Alert</h3>
+            <a href="#">Manage →</a>
+          </div>
+          <div class="panel-body">
+            <div class="panel-item">
+              <div><div class="panel-item-name">Organic Apples</div><div class="panel-item-sub">Fruits · 3 units left</div></div>
+              <span class="panel-item-badge badge-red">Critical</span>
+            </div>
+            <div class="panel-item">
+              <div><div class="panel-item-name">Fresh Milk 1L</div><div class="panel-item-sub">Dairy · 8 units left</div></div>
+              <span class="panel-item-badge badge-amber">Low</span>
+            </div>
+            <div class="panel-item">
+              <div><div class="panel-item-name">Sourdough Bread</div><div class="panel-item-sub">Bread · 5 units left</div></div>
+              <span class="panel-item-badge badge-amber">Low</span>
+            </div>
+            <div class="panel-item">
+              <div><div class="panel-item-name">Salmon Fillet</div><div class="panel-item-sub">Fish · 2 units left</div></div>
+              <span class="panel-item-badge badge-red">Critical</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

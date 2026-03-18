@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/results.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/header.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/footer.css') }}">
+  <title>GreenKart — Search Results</title>
+  <style>
+    :root {
+      --cream: #F7F3ED; --warm-white: #FDFAF6; --charcoal: #1C1C1E; --dark: #2D2D2D;
+      --forest: #2C5F2E; --forest-light: #3D7A40; --forest-pale: #EAF2EA;
+      --terracotta: #C4622D; --stone: #9B9189; --border: #DDD7CE;
+      --shadow-sm: 0 2px 8px rgba(28,28,30,0.08); --shadow-md: 0 4px 20px rgba(28,28,30,0.12);
+      --font-display: 'Playfair Display', Georgia, serif; --font-body: 'DM Sans', sans-serif;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--warm-white); color: var(--charcoal); }
+    .header { position: sticky; top: 0; z-index: 100; background: rgba(253,250,246,0.96); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 2rem; box-shadow: 0 2px 8px rgba(28,28,30,0.06); }
+    .header .container { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 2rem; height: 70px; }
+    .logo a { font-family: var(--font-display) !important; font-size: 1.5rem !important; font-weight: 700 !important; color: var(--forest) !important; text-decoration: none !important; background: none !important; padding: 0 !important; border-radius: 0 !important; }
+    .header nav { flex: 1; }
+    .header nav ul { display: flex; list-style: none; gap: 0.25rem; align-items: center; }
+    .header nav ul li a { font-size: 0.9rem; font-weight: 500; color: var(--dark); text-decoration: none; padding: 0.5rem 1rem; border-radius: 6px; transition: var(--transition); }
+    .header nav ul li a:hover { background: var(--forest-pale); color: var(--forest); }
+    .header nav form { display: flex; align-items: center; gap: 0.5rem; }
+    .header nav form input[type="search"] { padding: 0.5rem 1.1rem; border: 1.5px solid var(--border); border-radius: 50px; font-family: var(--font-body); font-size: 0.85rem; background: var(--cream); color: var(--charcoal); outline: none; width: 230px; }
+    .header nav form button { background: var(--forest); border: none; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .header nav form button .material-icons { color: white; font-size: 18px; }
+    .header .user { display: flex; align-items: center; gap: 0.75rem; margin-left: auto; }
+    .header .user a { display: flex; align-items: center; gap: 0.3rem; color: var(--dark); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.45rem 0.9rem; border-radius: 6px; transition: var(--transition); }
+    .header .user a:hover { background: var(--forest-pale); color: var(--forest); }
+    .header .cart { position: relative; }
+    .header #cart-count { position: absolute; top: 0; right: 0; background: var(--terracotta); color: white; font-size: 0.65rem; font-weight: 700; min-width: 18px; height: 18px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+
+    .page-header { background: linear-gradient(135deg, #1a3a1b 0%, #2C5F2E 100%); padding: 2.5rem 2rem; color: white; }
+    .page-header .inner { max-width: 1280px; margin: 0 auto; }
+    .page-header h1 { font-family: var(--font-display); font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+    .search-query { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: white; padding: 0.4rem 0.9rem; border-radius: 50px; font-size: 0.85rem; margin-top: 0.8rem; }
+
+    .results-layout { max-width: 1280px; margin: 2.5rem auto; padding: 0 2rem; }
+    .results-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .results-count { font-size: 0.88rem; color: var(--stone); }
+    .results-count span { font-weight: 600; color: var(--charcoal); }
+    .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--forest); text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 0.5rem 1rem; border: 1.5px solid var(--border); border-radius: 8px; transition: var(--transition); }
+    .back-link:hover { background: var(--forest-pale); border-color: var(--forest); }
+
+    .product-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
+    .product-item { background: white; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: var(--transition); }
+    .product-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .product-img { height: 120px; background: var(--forest-pale); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+    .product-info { padding: 1.2rem; }
+    .product-info h3 { font-size: 1rem; font-weight: 700; color: var(--charcoal); margin-bottom: 0.4rem; }
+    .product-info .description { font-size: 0.82rem; color: var(--stone); line-height: 1.5; margin-bottom: 0.6rem; }
+    .product-info .price { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--forest); }
+
+    .no-results { text-align: center; padding: 5rem 2rem; }
+    .no-results-icon { font-size: 4rem; margin-bottom: 1.2rem; }
+    .no-results h2 { font-family: var(--font-display); font-size: 1.5rem; color: var(--charcoal); margin-bottom: 0.5rem; }
+    .no-results p { color: var(--stone); margin-bottom: 1.5rem; }
+    .no-results a { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--forest); color: white; padding: 0.8rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: var(--transition); }
+    .no-results a:hover { background: var(--forest-light); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="logo"><a href="{{ url_for('home') }}">GreenKart</a></div>
+      <nav class="show-menu">
+        <ul>
+          <li><a href="{{ url_for('home') }}">Home</a></li>
+          <li><a href="{{ url_for('products') }}">Shop</a></li>
+          <li>
+            <form action="/search" method="GET">
+              <input type="search" name="query" placeholder="Search products..." value="{{ query }}">
+              <button type="submit"><i class="material-icons">search</i></button>
+            </form>
+          </li>
+        </ul>
+      </nav>
+      <div class="user">
+        <div class="profile"><a href="{{ url_for('profile') }}"><i class="material-icons">account_circle</i>Account</a></div>
+        <div class="cart">
+          <a href="{{ url_for('cart') }}">
+            <i class="material-icons">shopping_cart</i>
+            {% if cart_count > 0 %}<span id="cart-count">{{ cart_count }}</span>{% endif %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <div class="inner">
+      <h1>Search Results</h1>
+      <div class="search-query">🔍 "{{ query }}"</div>
+    </div>
+  </div>
+
+  <div class="results-layout">
+    <div class="results-meta">
+      <p class="results-count">
+        {% if products %}<span>{{ products|length }}</span> products found{% else %}No products found{% endif %}
+      </p>
+      <a href="{{ url_for('products') }}" class="back-link">← Back to Shop</a>
+    </div>
+
+    {% if products %}
+    <ul class="product-list">
+      {% for product in products %}
+      <li class="product-item">
+        <div class="product-img">
+          {% if product[5] == 'Fruit' %}🍎{% elif product[5] == 'Vegetable' %}🥦
+          {% elif product[5] == 'Dairy' %}🧀{% elif product[5] == 'Meat' %}🥩
+          {% elif product[5] == 'Fish' %}🐟{% elif product[5] == 'Bread' %}🍞{% else %}🛒{% endif %}
+        </div>
+        <div class="product-info">
+          <h3>{{ product[1] }}</h3>
+          <p class="description">{{ product[2] }}</p>
+          <p class="price">€ {{ product[3] }}</p>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="no-results">
+      <div class="no-results-icon">🔍</div>
+      <h2>No results for "{{ query }}"</h2>
+      <p>Try a different search term or browse our full product catalog.</p>
+      <a href="{{ url_for('products') }}">Browse All Products</a>
+    </div>
+    {% endif %}
+  </div>
+</body>
+</html>

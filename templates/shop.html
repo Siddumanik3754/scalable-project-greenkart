@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/shop.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/header.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/footer.css') }}">
+  <script src="{{ url_for('static', filename='scripts/shop.js') }}"></script>
+  <title>GreenKart — Shop</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+    :root {
+      --cream: #F7F3ED; --warm-white: #FDFAF6; --charcoal: #1C1C1E; --dark: #2D2D2D;
+      --forest: #2C5F2E; --forest-light: #3D7A40; --forest-pale: #EAF2EA;
+      --sage: #7A9E7E; --terracotta: #C4622D; --amber: #D4962A;
+      --stone: #9B9189; --light-stone: #E8E2DA; --border: #DDD7CE;
+      --shadow-sm: 0 2px 8px rgba(28,28,30,0.08); --shadow-md: 0 4px 20px rgba(28,28,30,0.12);
+      --shadow-lg: 0 12px 40px rgba(28,28,30,0.16);
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'DM Sans', sans-serif;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--warm-white); color: var(--charcoal); }
+
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(253,250,246,0.96); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border); padding: 0 2rem;
+      box-shadow: 0 2px 8px rgba(28,28,30,0.06);
+    }
+    .header .container {
+      max-width: 1280px; margin: 0 auto;
+      display: flex; align-items: center; gap: 2rem; height: 70px;
+    }
+    .logo a {
+      font-family: var(--font-display) !important; font-size: 1.5rem !important;
+      font-weight: 700 !important; color: var(--forest) !important;
+      text-decoration: none !important; background: none !important;
+      padding: 0 !important; border-radius: 0 !important;
+    }
+    .header nav { flex: 1; }
+    .header nav ul { display: flex; list-style: none; gap: 0.25rem; align-items: center; }
+    .header nav ul li a {
+      font-size: 0.9rem; font-weight: 500; color: var(--dark);
+      text-decoration: none; padding: 0.5rem 1rem; border-radius: 6px; transition: var(--transition);
+    }
+    .header nav ul li a:hover { background: var(--forest-pale); color: var(--forest); }
+    .header nav form { display: flex; align-items: center; gap: 0.5rem; }
+    .header nav form input[type="search"] {
+      padding: 0.5rem 1.1rem; border: 1.5px solid var(--border); border-radius: 50px;
+      font-family: var(--font-body); font-size: 0.85rem; background: var(--cream);
+      color: var(--charcoal); outline: none; width: 230px; transition: var(--transition);
+    }
+    .header nav form input[type="search"]:focus { border-color: var(--forest); background: white; }
+    .header nav form button {
+      background: var(--forest); border: none; cursor: pointer; width: 36px; height: 36px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    }
+    .header nav form button .material-icons { color: white; font-size: 18px; }
+    .header .user { display: flex; align-items: center; gap: 0.75rem; margin-left: auto; }
+    .header .user a {
+      display: flex; align-items: center; gap: 0.3rem; color: var(--dark);
+      text-decoration: none; font-size: 0.85rem; font-weight: 500;
+      padding: 0.45rem 0.9rem; border-radius: 6px; transition: var(--transition);
+    }
+    .header .user a:hover { background: var(--forest-pale); color: var(--forest); }
+    .header .cart { position: relative; }
+    .header #cart-count {
+      position: absolute; top: 0; right: 0;
+      background: var(--terracotta); color: white; font-size: 0.65rem; font-weight: 700;
+      min-width: 18px; height: 18px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center; padding: 0 4px;
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+      background: linear-gradient(135deg, #1a3a1b 0%, #2C5F2E 100%);
+      padding: 3rem 2rem; color: white;
+    }
+    .page-header .inner { max-width: 1280px; margin: 0 auto; }
+    .page-header h1 {
+      font-family: var(--font-display); font-size: 2.2rem; font-weight: 700;
+      margin-bottom: 0.4rem; letter-spacing: -0.02em;
+    }
+    .page-header p { color: rgba(255,255,255,0.7); font-size: 0.95rem; }
+
+    /* LAYOUT */
+    .shop-layout {
+      display: grid; grid-template-columns: 260px 1fr;
+      gap: 2rem; max-width: 1280px; margin: 2.5rem auto; padding: 0 2rem;
+    }
+
+    /* SIDEBAR */
+    .sidebar { }
+    .sidebar-card {
+      background: white; border: 1px solid var(--border); border-radius: 16px;
+      overflow: hidden; position: sticky; top: 90px;
+    }
+    .sidebar-header {
+      padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
+      background: var(--cream);
+    }
+    .sidebar-header h3 {
+      font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--charcoal);
+    }
+    #category-list { list-style: none; padding: 0.75rem 0; }
+    #category-list li {
+      padding: 0.7rem 1.5rem; font-size: 0.88rem; font-weight: 500;
+      color: var(--dark); cursor: pointer; transition: var(--transition);
+      display: flex; align-items: center; gap: 0.75rem;
+      border-left: 3px solid transparent;
+    }
+    #category-list li:hover { background: var(--forest-pale); color: var(--forest); }
+    #category-list li.active { background: var(--forest-pale); color: var(--forest); border-left-color: var(--forest); font-weight: 600; }
+    .cat-emoji-sm { font-size: 1rem; }
+
+    /* PRODUCTS */
+    .products-area { }
+    .products-toolbar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .products-count { font-size: 0.85rem; color: var(--stone); }
+    .products-count span { font-weight: 600; color: var(--charcoal); }
+
+    #product-list {
+      list-style: none; display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem;
+    }
+    #product-list li {
+      background: white; border: 1px solid var(--border); border-radius: 16px;
+      overflow: hidden; transition: var(--transition); display: flex; flex-direction: column;
+    }
+    #product-list li:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: #c5d9c6; }
+    .product-img-area {
+      height: 140px; background: var(--forest-pale);
+      display: flex; align-items: center; justify-content: center; font-size: 3rem;
+    }
+    .product-body { padding: 1rem 1.1rem; flex: 1; display: flex; flex-direction: column; }
+    #product-list li h3 {
+      font-size: 0.95rem; font-weight: 600; color: var(--charcoal);
+      margin-bottom: 0.35rem; line-height: 1.3;
+    }
+    #product-list li p {
+      font-size: 0.8rem; color: var(--stone); line-height: 1.5; margin-bottom: 0.6rem; flex: 1;
+    }
+    .product-price {
+      font-family: var(--font-display); font-size: 1.1rem; font-weight: 700;
+      color: var(--forest); margin-bottom: 0.9rem;
+    }
+    #product-list li button {
+      width: 100%; padding: 0.6rem; background: var(--forest); color: white;
+      border: none; border-radius: 8px; font-family: var(--font-body);
+      font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: var(--transition);
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    }
+    #product-list li button:hover { background: var(--forest-light); transform: none; }
+    #product-list li button::before { content: '+'; font-size: 1.1rem; line-height: 1; }
+
+    /* NOTIFICATION */
+    #message {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
+      background: var(--charcoal); color: white; padding: 0.9rem 1.4rem;
+      border-radius: 10px; font-size: 0.88rem; font-weight: 500;
+      box-shadow: var(--shadow-lg); transition: var(--transition);
+      display: none;
+    }
+    #message.show { display: block; animation: slideUp 0.3s ease; }
+    @keyframes slideUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="logo">
+        <a href="{{ url_for('home') }}">GreenKart</a>
+      </div>
+      <nav class="show-menu">
+        <ul>
+          <li><a href="{{ url_for('home') }}">Home</a></li>
+          <li><a href="{{ url_for('products') }}">Shop</a></li>
+          <li>
+            <form action="/search" method="GET">
+              <input type="search" name="query" placeholder="Search products...">
+              <button type="submit"><i class="material-icons">search</i></button>
+            </form>
+          </li>
+        </ul>
+      </nav>
+      <div class="user">
+        <div class="profile">
+          <a href="{{ url_for('profile') }}"><i class="material-icons">account_circle</i>Account</a>
+        </div>
+        <div class="cart">
+          <a href="{{ url_for('cart') }}">
+            <i class="material-icons">shopping_cart</i>
+            {% if cart_count > 0 %}<span id="cart-count">{{ cart_count }}</span>{% endif %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <div class="inner">
+      <h1>Shop All Products</h1>
+      <p>Fresh produce, dairy, meats, and more — all in one place</p>
+    </div>
+  </div>
+
+  <div class="shop-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-header"><h3>Categories</h3></div>
+        <ul id="category-list">
+          <li data-category="all" class="active"><span class="cat-emoji-sm">🛒</span> All Products</li>
+          <li data-category="Fruit"> Fruits</li>
+          <li data-category="Dairy"> Dairy</li>
+          <li data-category="Bread"> Breads</li>
+          <li data-category="Meat"> Meat</li>
+          <li data-category="Fish"> Fish</li>
+          <li data-category="Vegetable"> Vegetables</li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- PRODUCTS -->
+    <main class="products-area">
+      <div class="products-toolbar">
+        <p class="products-count">Showing <span>all</span> products</p>
+      </div>
+      <div id="message"></div>
+      <div id="cart-items"></div>
+      <ul id="product-list">
+        {% for product in products %}
+        <li data-category="{{ product[5] }}">
+          <div class="product-img-area">
+            <img src="{{ url_for('static', filename=product[4]) }}">
+          </div>
+          <div class="product-body">
+            <h3>{{ product[1] }}</h3>
+            <p>{{ product[2] }}</p>
+            <div class="product-price">€ {{ product[3] }}</div>
+            <button onclick="addToCart('{{ product[0] }}')">Add to Cart</button>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </main>
+  </div>
+</body>
+</html>
