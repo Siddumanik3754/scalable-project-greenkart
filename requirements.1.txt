@@ -1,6 +1,0 @@
-Flask
-pymysql==1.1.1
-gunicorn
-requests
-bcrypt
-boto3
