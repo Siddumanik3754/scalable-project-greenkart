@@ -4,3 +4,4 @@ gunicorn
 requests
 bcrypt
 boto3
+cryptography

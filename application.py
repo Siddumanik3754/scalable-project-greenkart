@@ -52,7 +52,7 @@ def recipe():
 @app.route('/products')
 def products():
     # Connect to the MySQL database
-    cnx = pymysql.connect(**db_config)
+    cnx = pymysql.connect(**db_config, autocommit=True)
     cursor = cnx.cursor()
 
     # Retrieve product data from the database
@@ -72,7 +72,7 @@ def get_cart_count():
     # Check if the user is authenticated
     if 'email' in session:
         # Connect to the MySQL database
-        cnx = pymysql.connect(**db_config)
+        cnx = pymysql.connect(**db_config, autocommit=True)
         cursor = cnx.cursor()
 
         # Retrieve the cart count for the user
@@ -109,7 +109,7 @@ def register():
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
         # Connect to the MySQL database
-        cnx = pymysql.connect(**db_config)
+        cnx = pymysql.connect(**db_config, autocommit=True)
         cursor = cnx.cursor()
 
         # Check if the email already exists in the database
@@ -152,7 +152,7 @@ def signin():
         password = request.form.get('password')
 
         # Connect to the MySQL database
-        cnx = pymysql.connect(**db_config)
+        cnx = pymysql.connect(**db_config, autocommit=True)
         cursor = cnx.cursor()
 
         # Retrieve the hashed password from the database
@@ -191,7 +191,7 @@ def profile():
     # Check if the user is authenticated (session exists)
     if 'email' in session:
         # Connect to the MySQL database
-        cnx = pymysql.connect(**db_config)
+        cnx = pymysql.connect(**db_config, autocommit=True)
         cursor = cnx.cursor()
 
         # Retrieve user data from the database
@@ -241,7 +241,7 @@ def search():
         return redirect(url_for('products'))
 
     # Connect to the MySQL database
-    cnx = pymysql.connect(**db_config)
+    cnx = pymysql.connect(**db_config, autocommit=True)
     cursor = cnx.cursor()
 
     # Search for products matching the query
@@ -265,7 +265,7 @@ def cart():
     if 'email' not in session:
         return redirect(url_for('signin'))
 
-    cnx = pymysql.connect(**db_config)
+    cnx = pymysql.connect(**db_config, autocommit=True)
     cursor = cnx.cursor()
 
     select_query = """
@@ -356,51 +356,225 @@ def apply_coupon(total_price, coupon):
     return total_price
 
 
-# Route for adding a product to the cart
+# # Route for adding a product to the cart
+# @app.route('/add_to_cart', methods=['POST'])
+# def add_to_cart():
+#     if 'email' not in session:
+#         return redirect(url_for('signin'))
+
+#     # Retrieve the product ID from the request form
+#     product_id = request.form.get('product_id')
+
+#     # Connect to the MySQL database
+#     cnx = pymysql.connect(**db_config, autocommit=True)
+#     cursor = cnx.cursor()
+
+#     # Retrieve the user's cart ID
+#     select_cart_query = "SELECT Id FROM cart WHERE UserId = (SELECT Id FROM user WHERE Email = %s)"
+#     cursor.execute(select_cart_query, (session['email'],))
+#     cart_row = cursor.fetchone()
+
+#     # Check if the user has an active cart
+#     if cart_row:
+#         cart_id = cart_row[0]
+#     else:
+#         # If the user does not have a cart, create a new cart
+#         insert_cart_query = "INSERT INTO cart (UserId) SELECT Id FROM user WHERE Email = %s"
+#         cursor.execute(insert_cart_query, (session['email'],))
+#         cnx.commit()
+
+#         # Retrieve the new cart ID
+#         cart_id = cursor.lastrowid
+
+#     # Insert the product into the user's cart
+#     insert_cart_product_query = "INSERT INTO cartproduct (CartId, ProductId) VALUES (%s, %s)"
+#     cart_product_data = (cart_id, product_id)
+#     cursor.execute(insert_cart_product_query, cart_product_data)
+#     cnx.commit()
+
+#     # Close the cursor and connection
+#     cursor.close()
+#     cnx.close()
+
+#     # Redirect back to the products page
+#     return jsonify({'status': 'success'})
+
+
+
+
+
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
     if 'email' not in session:
-        return redirect(url_for('signin'))
+        return jsonify({'status': 'error', 'message': 'Please login first'}), 401
 
     # Retrieve the product ID from the request form
     product_id = request.form.get('product_id')
+    quantity = int(request.form.get('quantity', 1))  # Get quantity, default to 1
+    
+    if not product_id:
+        return jsonify({'status': 'error', 'message': 'Invalid product'}), 400
 
-    # Connect to the MySQL database
-    cnx = pymysql.connect(**db_config)
-    cursor = cnx.cursor()
+    cnx = None
+    cursor = None
+    
+    try:
+        # Connect to the MySQL database
+        cnx = pymysql.connect(**db_config, autocommit=False)
+        cursor = cnx.cursor()
+        
+        # Start transaction
+        cnx.begin()
+        
+        # Get or create cart
+        select_cart_query = """
+            SELECT c.Id 
+            FROM cart c
+            INNER JOIN user u ON c.UserId = u.Id
+            WHERE u.Email = %s
+        """
+        cursor.execute(select_cart_query, (session['email'],))
+        cart_row = cursor.fetchone()
 
-    # Retrieve the user's cart ID
-    select_cart_query = "SELECT Id FROM cart WHERE UserId = (SELECT Id FROM user WHERE Email = %s)"
-    cursor.execute(select_cart_query, (session['email'],))
-    cart_row = cursor.fetchone()
-
-    # Check if the user has an active cart
-    if cart_row:
-        cart_id = cart_row[0]
-    else:
-        # If the user does not have a cart, create a new cart
-        insert_cart_query = "INSERT INTO cart (UserId) SELECT Id FROM user WHERE Email = %s"
-        cursor.execute(insert_cart_query, (session['email'],))
+        if cart_row:
+            cart_id = cart_row[0]
+        else:
+            # Create new cart for user
+            insert_cart_query = """
+                INSERT INTO cart (UserId) 
+                SELECT Id FROM user WHERE Email = %s
+            """
+            cursor.execute(insert_cart_query, (session['email'],))
+            cart_id = cursor.lastrowid
+            cnx.commit()
+            
+            # Start new transaction for cart operations
+            cnx.begin()
+        
+        # Check if product already exists in cart
+        check_product_query = """
+            SELECT Id, Quantity 
+            FROM cartproduct 
+            WHERE CartId = %s AND ProductId = %s
+        """
+        cursor.execute(check_product_query, (cart_id, product_id))
+        existing_product = cursor.fetchone()
+        
+        if existing_product:
+            # Update quantity if product already exists
+            new_quantity = existing_product[1] + quantity
+            update_query = """
+                UPDATE cartproduct 
+                SET Quantity = %s 
+                WHERE CartId = %s AND ProductId = %s
+            """
+            cursor.execute(update_query, (new_quantity, cart_id, product_id))
+            message = f'Product quantity updated in cart'
+        else:
+            # Insert new product to cart
+            insert_cart_product_query = """
+                INSERT INTO cartproduct (CartId, ProductId, Quantity) 
+                VALUES (%s, %s, %s)
+            """
+            cursor.execute(insert_cart_product_query, (cart_id, product_id, quantity))
+            message = 'Product added to cart successfully'
+        
+        # Commit transaction
         cnx.commit()
+        
+        # Get updated cart count
+        cursor.execute("""
+            SELECT SUM(Quantity) as total 
+            FROM cartproduct 
+            WHERE CartId = %s
+        """, (cart_id,))
+        cart_count = cursor.fetchone()[0] or 0
+        
+        return jsonify({
+            'status': 'success', 
+            'message': message,
+            'cart_count': cart_count
+        })
+        
+    except pymysql.err.IntegrityError as e:
+        if cnx:
+            cnx.rollback()
+        error_code = e.args[0]
+        if error_code == 1062:  # Duplicate entry
+            return jsonify({
+                'status': 'error', 
+                'message': 'Product already in cart. Please update quantity instead.'
+            }), 409
+        else:
+            return jsonify({'status': 'error', 'message': 'Database integrity error'}), 500
+            
+    except pymysql.Error as e:
+        if cnx:
+            cnx.rollback()
+        print(f"Database error in add_to_cart: {e}")
+        return jsonify({'status': 'error', 'message': 'Database error occurred'}), 500
+        
+    except Exception as e:
+        if cnx:
+            cnx.rollback()
+        print(f"Unexpected error in add_to_cart: {e}")
+        return jsonify({'status': 'error', 'message': 'An unexpected error occurred'}), 500
+        
+    finally:
+        if cursor:
+            cursor.close()
+        if cnx:
+            cnx.close()
 
-        # Retrieve the new cart ID
-        cart_id = cursor.lastrowid
-
-    # Insert the product into the user's cart
-    insert_cart_product_query = "INSERT INTO cartproduct (CartId, ProductId) VALUES (%s, %s)"
-    cart_product_data = (cart_id, product_id)
-    cursor.execute(insert_cart_product_query, cart_product_data)
-    cnx.commit()
-
-    # Close the cursor and connection
-    cursor.close()
-    cnx.close()
-
-    # Redirect back to the products page
-    return jsonify({'status': 'success'})
 
 
-# Route for removing a product from the cart
+
+
+
+
+
+
+
+# # Route for removing a product from the cart
+# @app.route('/remove_from_cart', methods=['POST'])
+# def remove_from_cart():
+#     # Check if the user is authenticated
+#     if 'email' not in session:
+#         return redirect(url_for('signin'))
+
+#     # Get the product ID from the request form
+#     product_id = request.form.get('product_id')
+
+#     # Connect to the MySQL database
+#     cnx = pymysql.connect(**db_config, autocommit=True)
+#     cursor = cnx.cursor()
+
+#     # Retrieve the user's cart ID
+#     select_cart_query = "SELECT Id FROM cart WHERE UserId = (SELECT Id FROM user WHERE Email = %s)"
+#     cursor.execute(select_cart_query, (session['email'],))
+#     cart_id = cursor.fetchone()[0]
+    
+#     print("QUERY:", select_cart_query)
+
+#     # Delete the product from the user's cart
+#     delete_query = "DELETE FROM cartproduct WHERE CartId = %s AND ProductId = %s"
+#     cursor.execute(delete_query, (cart_id, product_id))
+
+#     # Commit the changes
+#     cnx.commit()
+
+#     # Close the cursor and connection
+#     cursor.close()
+#     cnx.close()
+
+#     # Redirect back to the cart page
+#     return redirect(url_for('cart'))
+
+
+import flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+
+
 @app.route('/remove_from_cart', methods=['POST'])
 def remove_from_cart():
     # Check if the user is authenticated
@@ -409,26 +583,72 @@ def remove_from_cart():
 
     # Get the product ID from the request form
     product_id = request.form.get('product_id')
+    
+    if not product_id:
+        flash('Invalid product', 'danger')
+        return redirect(url_for('cart'))
 
-    # Connect to the MySQL database
-    cnx = pymysql.connect(**db_config)
-    cursor = cnx.cursor()
+    cnx = None
+    cursor = None
+    
+    try:
+        # Connect to the MySQL database with autocommit OFF for transaction control
+        cnx = pymysql.connect(**db_config, autocommit=False)
+        cursor = cnx.cursor()
 
-    # Retrieve the user's cart ID
-    select_cart_query = "SELECT Id FROM cart WHERE UserId = (SELECT Id FROM User WHERE Email = %s)"
-    cursor.execute(select_cart_query, (session['email'],))
-    cart_id = cursor.fetchone()[0]
+        # Start transaction explicitly
+        cnx.begin()
+        
+        # Retrieve the user's cart ID with proper error handling
+        select_cart_query = """
+            SELECT c.Id 
+            FROM cart c
+            INNER JOIN user u ON c.UserId = u.Id
+            WHERE u.Email = %s
+        """
+        cursor.execute(select_cart_query, (session['email'],))
+        result = cursor.fetchone()
+        
+        if not result:
+            flash('Cart not found', 'danger')
+            return redirect(url_for('cart'))
+            
+        cart_id = result[0]
 
-    # Delete the product from the user's cart
-    delete_query = "DELETE FROM cartproduct WHERE CartId = %s AND ProductId = %s"
-    cursor.execute(delete_query, (cart_id, product_id))
+        # Delete the product from the user's cart
+        delete_query = "DELETE FROM cartproduct WHERE CartId = %s AND ProductId = %s"
+        rows_affected = cursor.execute(delete_query, (cart_id, product_id))
 
-    # Commit the changes
-    cnx.commit()
+        # Commit the transaction if successful
+        cnx.commit()
+        
+        if rows_affected > 0:
+            flash('Product removed from cart successfully', 'success')
+        else:
+            flash('Product not found in cart', 'warning')
 
-    # Close the cursor and connection
-    cursor.close()
-    cnx.close()
+    except pymysql.Error as e:
+        # Rollback in case of error
+        if cnx:
+            cnx.rollback()
+        print(f"Database error: {e}")
+        flash('An error occurred while removing the product', 'danger')
+        return redirect(url_for('cart'))
+        
+    except Exception as e:
+        # Rollback for any other errors
+        if cnx:
+            cnx.rollback()
+        print(f"Unexpected error: {e}")
+        flash('An unexpected error occurred', 'danger')
+        return redirect(url_for('cart'))
+        
+    finally:
+        # Always close cursor and connection
+        if cursor:
+            cursor.close()
+        if cnx:
+            cnx.close()
 
     # Redirect back to the cart page
     return redirect(url_for('cart'))
@@ -447,7 +667,7 @@ def checkout():
     
 
 
-    cnx = pymysql.connect(**db_config)
+    cnx = pymysql.connect(**db_config, autocommit=True)
     cursor = cnx.cursor()
 
     # Retrieve cart data for the user from the database
@@ -510,7 +730,7 @@ def place_order():
     total_final_price = session.get("discounted_total")
 
     # Retrieve the user's ID
-    cnx = pymysql.connect(**db_config)
+    cnx = pymysql.connect(**db_config, autocommit=True)
     cursor = cnx.cursor()
 
     # Retrieve the UserId based on the user's email in the session
@@ -573,7 +793,7 @@ def order_confirmation(order_id):
     if 'email' not in session:
         return redirect(url_for('signin'))
 
-    cnx = pymysql.connect(**db_config)
+    cnx = pymysql.connect(**db_config, autocommit=True)
     cursor = cnx.cursor()
 
 
@@ -653,7 +873,7 @@ def shipping():
     if request.method == 'POST':
         if 'delete_shipping' in request.form:
             shipping_id = request.form.get('delete_shipping')
-            cnx = pymysql.connect(**db_config)
+            cnx = pymysql.connect(**db_config, autocommit=True)
             cursor = cnx.cursor()
             delete_shipping_query = "DELETE FROM shipping WHERE Id = %s"
             cursor.execute(delete_shipping_query, (shipping_id,))
@@ -669,7 +889,7 @@ def shipping():
             state_province = request.form.get('state_province')
             postal_code = request.form.get('postal_code')
             country = request.form.get('country')
-            cnx = pymysql.connect(**db_config)
+            cnx = pymysql.connect(**db_config, autocommit=True)
             cursor = cnx.cursor()
             select_user_query = "SELECT Id FROM user WHERE Email = %s"
             cursor.execute(select_user_query, (session['email'],))
@@ -695,7 +915,7 @@ def shipping():
             return render_template('shipping.html', shipping_info=shipping_info)
 
     
-    cnx = pymysql.connect(**db_config)
+    cnx = pymysql.connect(**db_config, autocommit=True)
     cursor = cnx.cursor()
     
     select_shipping_query = """
@@ -718,7 +938,7 @@ def inject_cart_count():
     if 'email' not in session:
         return dict(cart_count=0)
 
-    cnx = pymysql.connect(**db_config)
+    cnx = pymysql.connect(**db_config, autocommit=True)
     cursor = cnx.cursor()
 
     query = """

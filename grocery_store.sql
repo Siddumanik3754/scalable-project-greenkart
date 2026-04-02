@@ -138,7 +138,6 @@ INSERT INTO `order` (`Id`, `UserId`, `Status`, `Total`) VALUES
 (55, 28, 'processing', '678.98');
 
 -- --------------------------------------------------------
-
 --
 -- Table structure for table `orderproduct`
 --
