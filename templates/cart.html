@@ -289,7 +289,73 @@
     //   }
     // });
 
-    document.getElementById('btn-apply-coupon').addEventListener('click', function () {
+//     document.getElementById('btn-apply-coupon').addEventListener('click', function () {
+
+//     const couponInput = document.getElementById('coupon-input');
+//     const couponCode = couponInput.value.trim();
+
+//     const subtotal = parseFloat("{{ total_price }}");
+
+//     const feedback = document.getElementById('coupon-feedback');
+//     const feedbackText = document.getElementById('coupon-feedback-text');
+//     const feedbackIcon = document.getElementById('coupon-feedback-icon');
+
+//     if (!couponCode) {
+//         feedback.className = 'coupon-feedback error';
+//         feedbackText.textContent = "Please enter a coupon code";
+//         feedbackIcon.textContent = "error_outline";
+//         return;
+//     }
+
+//     fetch("/apply_coupon_cart", {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json"
+//         },
+//         body: JSON.stringify({
+//             total_amount: subtotal,
+//             coupon_code: couponCode
+//         })
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+
+//         if (data.status === "success") {
+
+//             const finalPrice = data.final_price;
+//             const discountAmount = data.discount_amount;
+
+//             document.getElementById("total-amount").innerText = "€ " + finalPrice;
+
+//             document.getElementById("discount-row").style.display = "flex";
+//             document.getElementById("discount-value").innerText = "- € " + discountAmount;
+
+//             feedback.className = "coupon-feedback success";
+//             feedbackIcon.textContent = "check_circle";
+//             feedbackText.textContent = data.discount_percent + "% discount applied!";
+
+//             couponInput.readOnly = true;
+
+//         } else {
+
+//             feedback.className = "coupon-feedback error";
+//             feedbackIcon.textContent = "error_outline";
+//             feedbackText.textContent = "Invalid coupon code";
+
+//         }
+
+//     })
+//     .catch(error => {
+
+//         feedback.className = "coupon-feedback error";
+//         feedbackIcon.textContent = "error_outline";
+//         feedbackText.textContent = "Coupon service unavailable";
+//     });
+
+// });
+
+
+document.getElementById('btn-apply-coupon').addEventListener('click', function () {
 
     const couponInput = document.getElementById('coupon-input');
     const couponCode = couponInput.value.trim();
@@ -324,6 +390,9 @@
 
             const finalPrice = data.final_price;
             const discountAmount = data.discount_amount;
+            
+            // Calculate discount percentage
+            const discountPercent = ((discountAmount / subtotal) * 100).toFixed(2);
 
             document.getElementById("total-amount").innerText = "€ " + finalPrice;
 
@@ -332,7 +401,7 @@
 
             feedback.className = "coupon-feedback success";
             feedbackIcon.textContent = "check_circle";
-            feedbackText.textContent = data.discount_percent + "% discount applied!";
+            feedbackText.textContent = discountPercent + "% discount applied!";
 
             couponInput.readOnly = true;
 
@@ -353,6 +422,9 @@
     });
 
 });
+
+
+
 
     // Allow pressing Enter to apply coupon
     document.getElementById('coupon-input').addEventListener('keydown', function (e) {
